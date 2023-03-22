@@ -6,4 +6,5 @@ This repo is dedicated to internally writing, testing and learning how C2 infras
 
 Sharing is caring :)
 
-## Pysee2 - [@scs-labrat](https://github.com/scs-labrat)
+## Pysee2
+[@scs-labrat](https://github.com/scs-labrat)
