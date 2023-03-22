@@ -1,12 +1,27 @@
 import socket
 import sys
+import os
 
+# Comm In Function
+def comm_in(remote_target):
+    print('[+] Awaiting response... ')
+    response = remote_target.recv(1024).decode()
+    return response
+
+# Comm_Out Function
+def comm_out(remote_target, message):
+    remote_target.send(message.encode())
+
+# Listener Handler Function
 def listener_handler():
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind((host_ip, host_port))
     print('[+] Awaiting connection from client...')
     sock.listen()
     remote_target, remote_ip = sock.accept()
+    comm_handler(remote_target, remote_ip)
+
+# Comm_Handler function
+def comm_handler(remote_target, remote_ip):
     print(f'[+] Connection received from {remote_ip[0]}')
     while True:
         try:
@@ -31,7 +46,10 @@ def listener_handler():
             remote_target.close()
             break
 
-host_ip = sys.argv[1]
-host_port = int(sys.argv[2])
-listener_handler()
+
+if __name__ == '__main__':  
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    host_ip = sys.argv[1]
+    host_port = int(sys.argv[2])
+    listener_handler()
 
