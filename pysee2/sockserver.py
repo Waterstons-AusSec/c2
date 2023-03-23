@@ -1,6 +1,7 @@
 import socket
 import sys
 import os
+import threading
 
 def banner():
 
@@ -36,45 +37,64 @@ def comm_in(remote_target):
 def comm_out(remote_target, message):
     remote_target.send(message.encode())
 
-# Listener Handler Function
-def listener_handler(host_ip, host_port, targets):
-    sock.bind((host_ip, host_port))
+# Listener Handler Update
+def listener_handler():
+    sock.bind((host_ip, int(host_port)))
     print('[+] Awaiting connection from client...')
     sock.listen()
-    remote_target, remote_ip = sock.accept()
-    targets.append([remote_target, remote_ip])
-    print(targets)
-    print((targets[0])[0])
-    print((targets[0])[1])
-    comm_handler(remote_target, remote_ip)
+    t1 = threading.Thread(target=comm_handler)
+    t1.start()
+    
+# Listener Handler Function
+# def listener_handler(host_ip, host_port, targets):
+#     sock.bind((host_ip, host_port))
+#     print('[+] Awaiting connection from client...')
+#     sock.listen()
+#     remote_target, remote_ip = sock.accept()
+#     targets.append([remote_target, remote_ip])
+#     print(targets)
+#     print((targets[0])[0])
+#     print((targets[0])[1])
+#     comm_handler(remote_target, remote_ip)
 
-# Comm_Handler function
-def comm_handler(remote_target, remote_ip):
-    print(f'[+] Connection received from {remote_ip[0]}')
+# Comm_Handler update
+def comm_handler():
     while True:
         try:
-            message = input('Message to send#> ')
-            #Exit message handling
-            if message == 'exit':
-                remote_target.send(message.encode())
-                remote_target.close()
-                break
-            remote_target.send(message.encode())
-            response = remote_target.recv(1024).decode()
-            if response == 'exit':
-                print('[-] Client has terminated the session. Bye bye..')
-                remote_target.close()
-                break
-            print(response)
-        except KeyboardInterrupt:
-            print('[-] Keyboard interrupt issued.')
-            message = 'exit'
-            remote_target.send(message.encode())
-            sock.close()
-            break
-        except Exception:
-            remote_target.close()
-            break
+            remote_target, remote_ip = sock.accept()
+            targets.append([remote_target, remote_ip[0]])
+            print(f'\n[+] Connection received from {remote_ip[0]}\n' + 'Enter Command#> ', end="")
+        except:
+            pass
+
+
+# Comm_Handler function
+# def comm_handler(remote_target, remote_ip):
+#     print(f'[+] Connection received from {remote_ip[0]}')
+#     while True:
+#         try:
+#             message = input('Message to send#> ')
+#             #Exit message handling
+#             if message == 'exit':
+#                 remote_target.send(message.encode())
+#                 remote_target.close()
+#                 break
+#             remote_target.send(message.encode())
+#             response = remote_target.recv(1024).decode()
+#             if response == 'exit':
+#                 print('[-] Client has terminated the session. Bye bye..')
+#                 remote_target.close()
+#                 break
+#             print(response)
+#         except KeyboardInterrupt:
+#             print('[-] Keyboard interrupt issued.')
+#             message = 'exit'
+#             remote_target.send(message.encode())
+#             sock.close()
+#             break
+#         except Exception:
+#             remote_target.close()
+#             break
 
 
 if __name__ == '__main__':
@@ -83,13 +103,35 @@ if __name__ == '__main__':
     banner()
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        host_ip = sys.argv[1]
-        host_port = int(sys.argv[2])
-        listener_handler(host_ip, host_port, targets)
+        #host_ip = sys.argv[1]
+        #host_port = int(sys.argv[2])
+        host_ip = '127.0.0.1'
+        host_port = 2222
+        
     except IndexError:
         print('[-] Command line argument(s) missing.  Please try again.')
     except Exception as e:
         print(e)
+    listener_handler()
+    while True:
+        try:
+            command = input('Enter command#> ')
+            if command.split(" ")[0] == 'sessions':
+                session_counter = 0
+                if command.split(" ")[1] == '-l':
+                    print('Session' + ' ' * 10 + 'Target')
+                    for target in targets:
+                        print(str(session_counter) + ' ' * 16 + target[1])
+                        session_counter += 1
+                    if command.split(" ")[1] == '-i':
+                        num = int(command.split(" ")[2])
+                        targ_id = (targets[num])[0]
+                        target_comm(targ_id)
+        except KeyboardInterrupt:
+            print('\n[-] Keyboard interrupt issued')
+            sock.closed
+            break
+
 
 
 
