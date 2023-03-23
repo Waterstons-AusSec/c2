@@ -9,7 +9,7 @@ def inbound():
     message = ''
     while True:
         try:
-            message = sock.recv(1024).decode()
+            message = sock.recv(8192).decode()
             return(message)
         except Exception:
             sock.close()

