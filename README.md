@@ -1,4 +1,4 @@
-# C2 - Testing and learing from C2 techniques
+# C2 - Testing and learning from C2 techniques
 
 This repo is dedicated to internally writing, testing and learning how C2 infrastructure operates
 
@@ -8,3 +8,5 @@ Sharing is caring :)
 
 ## Pysee2
 [@scs-labrat](https://github.com/scs-labrat)
+
+Based on lessons from Joe Helle's "Learn by doing: Python3 C2"  This project is a baseline to create customised C2 infrastructure in Python3. 
