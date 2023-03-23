@@ -68,10 +68,17 @@ def comm_handler(remote_target, remote_ip):
             break
 
 
-if __name__ == '__main__':  
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host_ip = sys.argv[1]
-    host_port = int(sys.argv[2])
+if __name__ == '__main__':
     banner()
-    listener_handler()
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        host_ip = sys.argv[1]
+        host_port = int(sys.argv[2])
+        listener_handler()
+    except IndexError:
+        print('[-] Command line argument(s) missing.  Please try again.')
+    except Exception as e:
+        print(e)
+
+
 
