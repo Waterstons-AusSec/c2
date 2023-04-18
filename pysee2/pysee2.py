@@ -233,24 +233,20 @@ def pshell_cradle():
 
 def help():
     print('''
-    ╔═╗┌─┐┌┬┐┌┬┐┌─┐┌┐┌┌┬┐┌─┐
-    ║ │ │││││││├─┤│││ ││└─┐
-    ╚═╝└─┘┴ ┴┴ ┴┴ ┴┘└┘─┴┘└─┘
+    
     ------------------------
     Menu Commands
     ------------------------------------------------------------
     ----------
     listeners -g --> Generate a new listener
-    winplant py --> Generate a Windows Compatible 
-    Python Payload
-    linplant py --> Generate a Linux Compatible Python 
-    Payload
-    exeplant --> Generate an executable payload for 
-    Windows
+    winplant py --> Generate a Windows Compatible Python Payload
+    linplant py --> Generate a Linux Compatible Python Payload
+    exeplant --> Generate an executable payload for Windows
     sessions -l --> List sessions
     sessions -i <val> --> Enter a new session
     kill <val> --> Kills an active session
     exit --> Exits BarebonesC2
+    
     Session Commands
     ------------------------------------------------------------
     -----------
