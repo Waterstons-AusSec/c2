@@ -1,4 +1,3 @@
-![Ryan IDeas Man](./ryanW.jpg)
 ```
                                    .x+=:.                              s 
                     ..           z`    ^%                            :8      x=~ 
@@ -20,4 +19,6 @@
 # PySee2
 ## C2 & Mischief Framework
 ---
+![Ryan IDeas Man](./ryanW.jpg)
+
 ####  Fun and games for all
